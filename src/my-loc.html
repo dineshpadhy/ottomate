@@ -1,0 +1,92 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="lazy-import" href="my-view2.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="lazy-import" href="my-app.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+
+
+<dom-module id="my-loc">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+    <firebase-query
+        id="queryloc"
+        app-name="users"
+        path="/publicdata"
+        data="{{locdata}}">
+    </firebase-query>
+    <!-- <div class="container">
+      <span>
+       <h4 class="hq"> Name:</h4>
+            {{dataloc.name}}
+          </span>
+    </div> -->
+      <!-- <dom-bind> -->
+
+      <template is="dom-if" if="[[fabclicked]]">
+        <div class="card">
+
+          <h1>Others</h1>
+          <h1>{{dataloc}}</h1>
+
+            <div>
+              <paper-dropdown-menu label="Country">
+                <paper-listbox slot="dropdown-content" selected="0">
+                  <paper-item>USA</paper-item>
+                  <paper-item>Germany</paper-item>
+                  <paper-item>China</paper-item>
+                  <paper-item>India</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
+            <paper-button dialog-dismiss class="indigo" on-click="cancel">Cancel</paper-button>
+            <paper-button dialog-confirm class="indigo">Assign</paper-button>
+
+          <!-- <template items={{item}}>
+            <div data="{{item}}"><h1>{{item.name}}</h1></div>
+          </template> -->
+          <p></p>
+        </div>
+
+      </template>
+
+
+
+    <!-- </dom-bind> -->
+
+    <!-- </template> -->
+
+  </template>
+
+  <script>
+    class MyLoc extends Polymer.Element {
+      static get is() { return 'my-loc'; }
+      static get properties() {
+        return {
+          dataloc:{
+            type:Object
+            // value: {name: "hii"},
+            // reflectToAttribute: true
+          }
+        };
+      }
+      cancel(){
+        console.log("cancelled")
+
+      }
+    }
+
+
+    window.customElements.define(MyLoc.is, MyLoc);
+  </script>
+</dom-module>

@@ -1,0 +1,380 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="lazy-import" href="my-app.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+
+
+
+
+
+<dom-module id="my-view2">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      #container {
+        display: flex;
+      }
+      paper-button {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-weight: normal;
+        font-size: 14px;
+        -webkit-font-smoothing: antialiased;
+      }
+      paper-button.indigo {
+        background-color: #127042;
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+
+        };
+      }
+      paper-button.indigo:hover {
+        background-color: var(--paper-indigo-400);
+      }
+    </style>
+
+    <firebase-auth id="googleInfo" app-name="users" user="{{user}}"></firebase-auth>
+
+
+    <firebase-query
+        id="query"
+        app-name="users"
+        path="/users/retail"
+        data="{{data}}">
+    </firebase-query>
+    <!-- <firebase-query
+        id="queryloc"
+        app-name="users"
+        path="/publicdata/states"
+        data="{{locdata}}">
+    </firebase-query> -->
+    <!-- <firebase-query
+        id="querycountry"
+        app-name="users"
+        path="/publicdata/countries"
+        data="{{countriesdata}}">
+    </firebase-query> -->
+    <firebase-query
+        id="queryloc"
+        app-name="users"
+        data="{{publicdata}}"
+        path="/publicdata">
+    </firebase-query>
+
+
+    <app-location
+        route="{{route}}"
+        url-space-regex="^[[rootPath]]">
+      </app-location>
+
+    <app-route
+        route="{{route}}"
+        pattern="[[rootPath]]:page"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+    </app-route>
+
+
+    <template is="dom-repeat" items={{data}} as="salesperson">
+      <template is="dom-if" if="{{!salesperson.registered}}">
+        <div class="card" hidden$=[[fabclicked]]>
+          <div data="{{salesperson}}"><h1>{{salesperson.name}}</h1></div>
+            <paper-button raised class="indigo" fabclicked=[[fabclicked]] data-item={{salesperson}} on-click="setValue" >Show Details</paper-button>
+            <!-- <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+              <a name="loc" href="[[rootPath]]loc" data-item={{salesperson}}><paper-button raised class="indigo" fabclicked=[[fabclicked]] data-item={{salesperson}} on-click="setValue" >Show Details</paper-button>
+</a>
+            </iron-selector> -->
+
+            <!-- <a name="loc" href="[[rootPath]]loc" fabclicked=[[fabclicked]] dataloc=[[value]]}><paper-button raised class="indigo" data-item={{salesperson}} on-click="setValue" >Show Details</paper-button></a> -->
+        </div>
+      </template>
+    </template>
+
+
+    <paper-dialog id="required-note" align="center" style="margin: 20px 10px 20px 10px; width: 540px;">
+        <span ><paper-icon-button noink src="../images/manifest/icon-48x48.png" alt="ottomate" title="ottomate">
+        </paper-icon-button><h2 style="display: inline-block; align-content: center;">{{val.name}}</h2></span>
+        <paper-dialog-scrollable><br>
+
+          <h1>{{values.name}}</h1>
+          <div>Email: {{values.email}}</div>
+          <div>Current Registration Status: {{values.registered}}</div>
+
+          <form is="iron-form" id="form" action="" method="post" style="margin: 0px 10px 20px 10px">
+            <h2 style ="margin: 20px 10px 0px 0px;"   align="left">Register Salesman</h2>
+            <paper-input type="text" name="registered" id="registered"  required label="Type true or false *" value=[[formdata.registered]] error-message="This field is required"></paper-input>
+
+             <h2 style ="margin: 20px 10px 0px 0px;"   align="left">Select Zone</h2>
+             <paper-dropdown-menu-light class="sleft" id="states" label="States *" name="states" always-float-label required >
+                <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{selection}}" slot="dropdown-content" >
+                    <template is="dom-repeat" items="{{_getDataByKey(publicdata,'states')}}" as="state" >
+                    <paper-item value="[[state]]">{{state}}</paper-item>
+                     </template>
+                </paper-listbox>
+             </paper-dropdown-menu-light>
+             <paper-dropdown-menu-light class="sright" label="Distict *" name="districts"  id="districts" always-float-label required>
+                <paper-listbox class="dropdown-content" slot="dropdown-content" >
+                    <template is="dom-repeat" items="[[_test(selection)]]" as="district">
+                    <paper-item value="[[district]]">{{district}}</paper-item>
+                     </template>
+                </paper-listbox>
+            </paper-dropdown-menu-light><br><br>
+
+            <paper-button hidden$=[[clicked]] class="indigo" on-click="_updatdata">Update</paper-button>
+            <paper-button class="indigo" data-item="{{values}}"  on-click="_reject">Reject</paper-button>
+            <paper-button class="indigo" dialog-dismiss on-click="_cancelled">CANCEL</paper-button>
+          </form>
+
+          <div style="margin: 20px 10px 20px 0px"   align="left">
+          <paper-dialog id="required-notice" align="center" style="margin: 20px 10px 20px 10px">
+              <h2>Missing Fields</h2>
+              <paper-dialog-scrollable >
+                  <span >Missing some form items.Please try again.</span>
+              </paper-dialog-scrollable>
+              <div class="buttons">
+                <paper-button class="indigo" dialog-dismiss>OK</paper-button>
+              </div>
+          </paper-dialog>
+          </div>
+
+          <div style="margin: 20px 10px 20px 0px"   align="left">
+          <paper-dialog id="update-notice" align="center" style="margin: 20px 10px 20px 10px">
+              <h2>Notice</h2>
+              <paper-dialog-scrollable >
+                  <span>Updated succesfuly</span>
+              </paper-dialog-scrollable>
+              <div class="buttons">
+              <paper-button class="indigo" dialog-dismiss>OK</paper-button>
+            </div>
+          </paper-dialog>
+          </div>
+
+          <div style="margin: 20px 10px 20px 0px"   align="left">
+          <paper-dialog id="required-note1" align="center" style="margin: 20px 10px 20px 10px; width: 540px;">
+              <span ><paper-icon-button noink icon="warning">
+              </paper-icon-button><h2 style="display: inline-block; align-content: center;">Alert</h2></span>
+              <paper-dialog-scrollable><br>
+                  <span>You want to remove {{val.name}}? </span></paper-button>
+              </paper-dialog-scrollable>
+              <div class="buttons">
+                <paper-button class="indigo" dialog-dismiss on-click="_cancelled">CANCEL</paper-button><br>
+                <paper-button class="indigo" on-click="_remove" >YES</paper-button>
+              </div>
+          </paper-dialog>
+          </div>
+
+        </paper-dialog-scrollable>
+
+    </paper-dialog>
+  </template>
+
+  <script>
+    class MyView2 extends Polymer.Element {
+      static get is() { return 'my-view2'; }
+      static get properties() {
+        return {
+          data:{
+            type: String,
+            notify: true,
+            readOnly: false
+          },
+          values:{
+            type: Object,
+            notify: true,
+            readOnly: false
+          },
+          fabclicked:{
+               type: Boolean,
+               reflectToAttribute: true,
+               notify: true
+
+           },
+           user: {
+               type: Object
+           },
+           publicdata: {
+               type: Object,
+               notify: true
+           },
+           formdata:{
+               type:Object,
+               notify:true,
+               reflectToAttribute: true
+           },
+           selected: {
+               type: String
+           },
+           success:{
+               type: Boolean,
+               reflectToAttribute: true,
+               notify:true,
+               value: false
+           },
+           selection:{
+               type: Object,
+               reflectToAttribute: true,
+               notify: true,
+           },
+           user_info_form:{
+             type: Object
+           },
+           childkey:{
+             type: String,
+             reflectToAttribute: true
+           },
+           val:{
+             type: Object,
+             notify: true,
+             readOnly: false
+           }
+        };
+      }
+
+      Const(){
+       /*debugger*/
+
+             return {
+                 "appliances":0,
+                 "states":2
+
+             };
+         }
+
+
+      _getDataByKey(obj,key){
+        console.log(obj,key)
+        // debugger
+         try{
+
+            let states = (Object.keys(obj[this.Const()[key]]));
+              var index = states.indexOf("$key");
+            if (index !== -1) states.splice(index, 1);
+            return states;
+          }
+        catch(err){
+          console.log("here",this.$.queryloc)
+          return
+        }
+      }
+
+      _test(data){
+          let valu,value;
+          if(data == null){
+              console.log("nothing")
+          }
+          this.$.googleInfo.app.database().ref('/publicdata').once("value", function(snapshot) {
+
+               value= snapshot;
+                          } );
+          // debugger
+          this.$.googleInfo.app.database().ref('/publicdata/states').child(data).once("value", function(snapshot) {
+
+              valu= snapshot.val();
+                          } );
+          return valu;
+      }
+      validate(value, re) {
+          if (re === undefined) {
+              return value !== undefined && value !== '';
+          }
+          return re.test(value);
+      }
+
+
+      _getkey(){
+        // debugger
+        return this.values.$key;
+      }
+      _getInitRef(){
+        // debugger
+        return "/users/retail";
+      }
+
+      _updatdata(event) {
+
+          var registered,ukey,state,city;
+
+          if(this.key){
+            // debugger
+            ukey=this.key;
+          }else{
+            ukey= this._getkey();
+          }
+           let udrID= this._getInitRef() + "/" + ukey ;
+           let formcomp=Polymer.dom(this.root).querySelector("#form").children;
+          this.user_info_form={
+           registered : formcomp.registered.value,
+           state: formcomp.states.value,
+           city: formcomp.districts.value
+          };
+          if (!this.validate(this.user_info_form.registered) || !this.validate(this.user_info_form.state) || !this.validate(this.user_info_form.city)) {
+              Polymer.dom(this.root).querySelector('#required-notice').open();
+              return;
+          }
+          else
+          {
+              this.$.googleInfo.app.database().ref(udrID).update(this.user_info_form, function(error) {
+                  if (error) {
+                                  alert("Data could not be saved." + error);
+                              }});
+              this.success=true;
+              /*this.selected="ottomateretail-home";*/
+          }
+      }
+
+      _reject(event){
+          var item = event.target.dataItem;
+          this.val=item;
+          this.key=item.$key;
+          // this.fabclick=!this.fabclick;
+          Polymer.dom(this.root).querySelector("#required-note1").open();
+          console.log(this.key)
+          // console.log(this.$.googleInfo.users.uid)
+      }
+
+      _remove(e){
+        console.log("removed")
+        // let key = e.currentTarget.users.retail.$key;
+        this.$.query.ref.child(this.key).remove();
+        console.log("removed")
+      }
+      _cancelled(){
+        Polymer.dom(this.root).querySelector("#required-notice").close();
+        Polymer.dom(this.root).querySelector("#required-note1").close();
+        Polymer.dom(this.root).querySelector("#required-note").close();
+
+      }
+
+      setValue(event){
+        // debugger
+        var item = event.target.dataItem;
+        this.values=item;
+        this.key=item.$key;
+        Polymer.dom(this.root).querySelector("#required-note").open();
+
+        // this.fabclicked=!this.fabclicked;
+        console.log(this.values)
+        console.log(this.values.$key)
+        // debugger
+      }
+    }
+    window.customElements.define(MyView2.is, MyView2);
+  </script>
+</dom-module>

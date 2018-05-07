@@ -1,0 +1,195 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<script src="../webcomponentsjs/webcomponents-lite.js"></script>
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/iron-demo-helpers/demo-pages-shared-styles.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="lazy-import" href="my-view3.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+
+
+
+<dom-module id="my-view1">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      #container {
+        display: flex;
+      }
+      paper-button {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-weight: normal;
+        font-size: 14px;
+        -webkit-font-smoothing: antialiased;
+      }
+      paper-button.indigo {
+        background-color: #127042;
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-indigo-400) !important;
+          color: white !important;
+        };
+      }
+      paper-button.indigo:hover {
+        background-color: var(--paper-indigo-400);
+      }
+      iron-list {
+         flex: 1 1 auto;
+      }
+      .item {
+        @apply --layout-horizontal;
+      }
+
+      /*Dropdown menu*/
+      <style is="custom-style" include="demo-pages-shared-styles">
+        paper-dropdown-menu, paper-listbox {
+          width: 250px;
+        }
+        paper-dropdown-menu {
+          height: 200px;
+          margin: auto;
+          display: block;
+        }
+      </style>
+    </style>
+
+
+    <firebase-query
+        id="query"
+        app-name="users"
+        path="/users/retail"
+        data="{{data}}">
+    </firebase-query>
+    <template is="dom-repeat" items={{data}} as="item">
+      <template is="dom-if" if="{{item.registered}}">
+        <div class="card" hidden$=[[fabclick]]>
+          <div data="{{item}}"><h1>{{item.name}}</h1></div>
+          <p></p>
+          <div data="{{item}}">Email: {{item.email}}</div>
+          <p></p>
+          <paper-button raised class="indigo" data-item={{item}} on-click="_load">Show Details</paper-button>
+          <paper-button raised class="indigo"  fabclick=[[fabclick]] data-item={{item}} on-click="_dialog">Remove Salesman</paper-button>
+
+        </div>
+
+      </template>
+
+
+    </template>
+    <div style="margin: 20px 10px 20px 0px"   align="left">
+    <paper-dialog id="required-notice" align="center" style="margin: 20px 10px 20px 10px; width: 540px;">
+        <span ><paper-icon-button noink icon="warning">
+        </paper-icon-button><h2 style="display: inline-block; align-content: center;">Alert</h2></span>
+        <paper-dialog-scrollable><br>
+            <span>You want to remove {{val.name}}? </span></paper-button>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button class="indigo" dialog-dismiss on-click="_cancelled">CANCEL</paper-button><br>
+          <paper-button class="indigo" on-click="_remove" >YES</paper-button>
+        </div>
+    </paper-dialog>
+    </div>
+
+    <div style="margin: 20px 10px 20px 0px"   align="left">
+    <paper-dialog id="required-note" align="center" style="margin: 20px 10px 20px 10px; width: 540px;">
+        <span ><paper-icon-button noink src="../images/manifest/icon-48x48.png" alt="ottomate" title="ottomate">
+        </paper-icon-button><h2 style="display: inline-block; align-content: center;">{{val.name}}</h2></span>
+        <paper-dialog-scrollable><br>
+          <p></p>
+          <span> Name: {{val.name}}</span><br>
+          <p></p>
+          <span> Email: {{val.email}}</span><br>
+          <p></p>
+          <span> Registered Salesman: {{val.registered}}</span><br>
+          <p></p>
+          <span> State: {{val.state}}</span><br>
+          <p></p>
+          <span> City: {{val.city}}</span><br>
+          <p></p></paper-button>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button class="indigo" dialog-dismiss on-click="_cancelled">CANCEL</paper-button>
+        </div>
+    </paper-dialog>
+    </div>
+
+  </template>
+
+  <script>
+    class MyView1 extends Polymer.Element {
+      static get is() { return 'my-view1'; }
+      static get properties(){
+        return {
+          uid: String,
+          data: {
+            type: Object,
+            observer: 'dataChanged'
+          },
+          backbtn:{
+                  type:Boolean,
+                  value:false,
+                  reflectToAttribute: true,
+                  notify:true
+
+                },
+          fabclick:{
+               type: Boolean,
+               reflectToAttribute: true,
+               notify: true
+          },
+          val:{
+            type: Object,
+            notify: true,
+            readOnly: false
+          }
+      }
+    }
+
+      _dialog(event){
+        var item = event.target.dataItem;
+        this.val=item;
+        this.key=item.$key;
+        // this.fabclick=!this.fabclick;
+        Polymer.dom(this.root).querySelector("#required-notice").open();
+        console.log(this.key)
+        // console.log(this.$.googleInfo.users.uid)
+      }
+      dataChanged(){
+        console.log(this.$)
+      }
+
+      _load(event) {
+        var item = event.target.dataItem;
+        this.val=item;
+        this.key=item.$key;
+        // this.fabclick=!this.fabclick;
+        Polymer.dom(this.root).querySelector("#required-note").open();
+        console.log(this.key)
+      }
+      _remove(e){
+        console.log("removed")
+        // let key = e.currentTarget.users.retail.$key;
+        this.$.query.ref.child(this.key).remove();
+        console.log("removed")
+      }
+      _cancelled(){
+        Polymer.dom(this.root).querySelector("#required-notice").close();
+
+      }
+
+    }
+    window.customElements.define(MyView1.is, MyView1);
+  </script>
+</dom-module>
