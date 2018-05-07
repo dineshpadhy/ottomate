@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Polymer App Toolbox - Starter Kit
 
 [![Build Status](https://travis-ci.org/Polymer/polymer-starter-kit.svg?branch=master)](https://travis-ci.org/Polymer/polymer-starter-kit)
@@ -123,3 +124,6 @@ application. Each new demand-loaded fragment should be added to the list of
 `fragments` in the included `polymer.json` file. This will ensure those
 components and their dependencies are added to the list of pre-cached components
 and will be included in the build.
+=======
+# ottomate
+>>>>>>> 8d74a49718383f6889e0b2a6fcb4d005eb4e540d
